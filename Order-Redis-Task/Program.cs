@@ -17,8 +17,12 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
 {
-    var configuration = builder.Configuration.GetConnectionString("Redis");
-    return ConnectionMultiplexer.Connect(configuration ?? "localhost:6379");
+    var configurationString = builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379";
+
+    var options = ConfigurationOptions.Parse(configurationString);
+    options.AbortOnConnectFail = false;
+
+    return ConnectionMultiplexer.Connect(options);
 });
 
 builder.Services.AddScoped<ICacheService, RedisCacheService>();
